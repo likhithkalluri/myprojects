@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaze Detection</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #video-feed {
+            border: 2px solid #ccc;
+            width: 640px;
+            height: 480px;
+            margin-bottom: 20px;
+        }
+        #gaze-direction {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gaze Detection</h1>
+    <!-- Video feed -->
+    <img id="video-feed" src="{% url 'video_feed' %}" alt="Video Feed">
+    <!-- Gaze direction -->
+    <div id="gaze-direction">Waiting for gaze detection...</div>
+
+    <script>
+        function updateGaze() {
+            $.ajax({
+                url: "{% url 'detect_gaze' %}",
+                method: "GET",
+                success: function(data) {
+                    if (data.gaze_direction) {
+                        document.getElementById("gaze-direction").innerText = `Gaze Direction: ${data.gaze_direction}`;
+                    } else {
+                        document.getElementById("gaze-direction").innerText = "No face detected.";
+                    }
+                },
+                error: function() {
+                    document.getElementById("gaze-direction").innerText = "Error detecting gaze.";
+                }
+            });
+        }
+
+        // Update gaze direction every second
+        setInterval(updateGaze, 1000);
+    </script>
+</body>
+</html>
