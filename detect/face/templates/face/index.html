@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection</title>
+    <style>
+        #video {
+            width: 80%;
+            margin: auto;
+            display: block;
+            border: 2px solid black;
+        }
+        #face-count {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+    </style>
+
+    <!-- Automatically refresh the page every 5 seconds -->
+    <meta http-equiv="refresh" content="5">
+
+</head>
+<body>
+    <h1>Face Detection on Webcam</h1>
+
+    <!-- Video Feed -->
+    <img id="video" src="{% url 'video_feed' %}" />
+
+    <!-- Face Count -->
+    <div id="face-count">
+        Faces Detected: {{ face_count }}
+    </div>
+</body>
+</html>
