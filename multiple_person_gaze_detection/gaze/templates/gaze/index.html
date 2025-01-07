@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaze Detection</title>
+</head>
+<body>
+    <h1>Gaze Detection</h1>
+    <img src="/stream-video/" alt="Video Feed" style="width: 100%; max-width: 640px;">
+    <ul id="gaze-output"></ul>
+    <script>
+        async function getGazeData() {
+            try {
+                const response = await fetch('/detect-gaze/');
+                const data = await response.json();
+                const gazeOutput = document.getElementById('gaze-output');
+                gazeOutput.innerHTML = ''; // Clear previous data
+                data.gazes.forEach(person => {
+                    const listItem = document.createElement('li');
+                    listItem.innerText = `${person.person}: ${person.gaze_direction}`;
+                    gazeOutput.appendChild(listItem);
+                });
+            } catch (err) {
+                console.error('Error fetching gaze data:', err);
+            }
+        }
+        setInterval(getGazeData, 1500);
+    </script>
+</body>
+</html>
