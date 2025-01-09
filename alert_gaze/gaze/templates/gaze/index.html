@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaze Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            text-align: center;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            margin: 20px 0;
+        }
+
+        #video-stream {
+            width: 80%;
+            max-width: 720px;
+            border: 5px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #gaze-info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .gaze-direction {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .green {
+            color: green;
+        }
+
+        .red {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gaze Detection</h1>
+    
+    <!-- Video Stream -->
+    <img id="video-stream" src="/stream_video/" alt="Video Stream">
+    
+    <!-- Gaze Info and Alerts -->
+    <div id="gaze-info">
+        <div id="gaze-direction" class="gaze-direction"></div>
+        <div id="alert-message" class="message"></div>
+    </div>
+
+    <script>
+        // Function to fetch gaze detection data and update the message and direction
+        function fetchGazeData() {
+            fetch('/detect_gaze/')
+                .then(response => response.json())
+                .then(data => {
+                    const gazeDirectionDiv = document.getElementById('gaze-direction');
+                    const alertMessageDiv = document.getElementById('alert-message');
+                    
+                    // If there are no people detected, display a generic message
+                    if (data.gazes.length === 0) {
+                        gazeDirectionDiv.textContent = "No face detected";
+                        alertMessageDiv.textContent = "";
+                        return;
+                    }
+
+                    // Update gaze direction for each detected person
+                    let gazeText = "";
+                    let alertText = "";
+                    data.gazes.forEach(gaze => {
+                        gazeText = `Person looking ${gaze.horizontal_direction} (${gaze.angle.toFixed(1)}°)`;
+
+                        // Display alert message based on gaze angle
+                        if (gaze.horizontal_direction === "left" || gaze.horizontal_direction === "right") {
+                            if (gaze.angle > 22.5) {
+                                alertText = `Alert! You are seeing out of the screen.`;
+                                alertMessageDiv.className = "message red";
+                            } else {
+                                alertText = `You are in the screen.`;
+                                alertMessageDiv.className = "message green";
+                            }
+                        } else {
+                            alertText = "";  // No alert for center gaze
+                        }
+                    });
+
+                    // Update the UI with gaze direction and alert message
+                    gazeDirectionDiv.textContent = gazeText;
+                    alertMessageDiv.textContent = alertText;
+                })
+                .catch(err => console.error('Error fetching gaze data:', err));
+        }
+
+        // Fetch and update gaze data every second
+        setInterval(fetchGazeData, 1000);
+
+    </script>
+</body>
+</html>
