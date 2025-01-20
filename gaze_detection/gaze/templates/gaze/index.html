@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaze Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        #video-container {
+            margin-bottom: 20px;
+        }
+        #gaze-data {
+            font-size: 18px;
+            color: #333;
+        }
+        .person-gaze {
+            margin: 10px 0;
+        }
+        .person-gaze span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gaze Detection</h1>
+    
+    <!-- Video Feed Section -->
+    <div id="video-container">
+        <img id="video-feed" src="{% url 'stream_video' %}" alt="Live Video Feed" />
+    </div>
+    
+    <!-- Gaze Data Section -->
+    <div id="gaze-data">
+        <h2>Detected Gaze Directions</h2>
+        <div id="gaze-list"></div>
+    </div>
+
+    <script>
+        // Function to fetch gaze data from the backend
+        function fetchGazeData() {
+            fetch('/detect_gaze/')
+                .then(response => response.json())
+                .then(data => {
+                    const gazeList = document.getElementById('gaze-list');
+                    gazeList.innerHTML = ''; // Clear the previous data
+                    
+                    if (data.gazes && data.gazes.length > 0) {
+                        data.gazes.forEach(gaze => {
+                            const gazeDiv = document.createElement('div');
+                            gazeDiv.classList.add('person-gaze');
+                            gazeDiv.innerHTML = `<span>${gaze.person}:</span> ${gaze.gaze_direction}`;
+                            gazeList.appendChild(gazeDiv);
+                        });
+                    } else {
+                        gazeList.innerHTML = '<p>No faces detected.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching gaze data:', error);
+                });
+        }
+
+        // Call fetchGazeData function every 1 second to update gaze data
+        setInterval(fetchGazeData, 1000);
+
+        // Initial fetch when the page loads
+        fetchGazeData();
+    </script>
+</body>
+</html>
