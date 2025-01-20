@@ -4,53 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gaze Detection</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
+            background-color: #f0f0f0;
         }
-        #video-feed {
-            border: 2px solid #ccc;
-            width: 640px;
-            height: 480px;
+        h1 {
+            color: #333;
+        }
+        #video-container {
             margin-bottom: 20px;
         }
-        #gaze-direction {
-            font-size: 24px;
-            font-weight: bold;
+        #gaze-data {
+            font-size: 18px;
             color: #333;
+        }
+        .person-gaze {
+            margin: 10px 0;
+        }
+        .person-gaze span {
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <h1>Gaze Detection</h1>
-    <!-- Video feed -->
-    <img id="video-feed" src="{% url 'video_feed' %}" alt="Video Feed">
-    <!-- Gaze direction -->
-    <div id="gaze-direction">Waiting for gaze detection...</div>
+    
+    <!-- Video Feed Section -->
+    <div id="video-container">
+        <img id="video-feed" src="{% url 'stream_video' %}" alt="Live Video Feed" />
+    </div>
+    
+    <!-- Gaze Data Section -->
+    <div id="gaze-data">
+        <h2>Detected Gaze Directions</h2>
+        <div id="gaze-list"></div>
+    </div>
 
     <script>
-        function updateGaze() {
-            $.ajax({
-                url: "{% url 'detect_gaze' %}",
-                method: "GET",
-                success: function(data) {
-                    if (data.gaze_direction) {
-                        document.getElementById("gaze-direction").innerText = `Gaze Direction: ${data.gaze_direction}`;
+        // Function to fetch gaze data from the backend
+        function fetchGazeData() {
+            fetch('/detect_gaze/')
+                .then(response => response.json())
+                .then(data => {
+                    const gazeList = document.getElementById('gaze-list');
+                    gazeList.innerHTML = ''; // Clear the previous data
+                    
+                    if (data.gazes && data.gazes.length > 0) {
+                        data.gazes.forEach(gaze => {
+                            const gazeDiv = document.createElement('div');
+                            gazeDiv.classList.add('person-gaze');
+                            gazeDiv.innerHTML = `<span>${gaze.person}:</span> ${gaze.gaze_direction}`;
+                            gazeList.appendChild(gazeDiv);
+                        });
                     } else {
-                        document.getElementById("gaze-direction").innerText = "No face detected.";
+                        gazeList.innerHTML = '<p>No faces detected.</p>';
                     }
-                },
-                error: function() {
-                    document.getElementById("gaze-direction").innerText = "Error detecting gaze.";
-                }
-            });
+                })
+                .catch(error => {
+                    console.error('Error fetching gaze data:', error);
+                });
         }
 
-        // Update gaze direction every second
-        setInterval(updateGaze, 1000);
+        // Call fetchGazeData function every 1 second to update gaze data
+        setInterval(fetchGazeData, 500);
+
+        // Initial fetch when the page loads
+        fetchGazeData();
     </script>
 </body>
 </html>
