@@ -29,6 +29,14 @@
         .person-gaze span {
             font-weight: bold;
         }
+        .screen {
+            color: green;
+            font-weight: bold;
+        }
+        .alert {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -53,12 +61,33 @@
                 .then(data => {
                     const gazeList = document.getElementById('gaze-list');
                     gazeList.innerHTML = ''; // Clear the previous data
-                    
+
                     if (data.gazes && data.gazes.length > 0) {
                         data.gazes.forEach(gaze => {
                             const gazeDiv = document.createElement('div');
                             gazeDiv.classList.add('person-gaze');
+
+                            // Extract angle value from gaze direction string
+                            const angleMatch = gaze.gaze_direction.match(/\((\d+\.\d*)\u00b0\)/);
+                            const angle = angleMatch ? parseFloat(angleMatch[1]) : null;
+
+                            // Add gaze information
                             gazeDiv.innerHTML = `<span>${gaze.person}:</span> ${gaze.gaze_direction}`;
+
+                            // Add condition based on the angle
+                            const conditionDiv = document.createElement('div');
+                            if (angle !== null) {
+                                if (angle <= 13) {
+                                    conditionDiv.textContent = "You are seeing the screen.";
+                                    conditionDiv.classList.add('screen');
+                                } else {
+                                    conditionDiv.textContent = "Alert! You are seeing out of the screen.";
+                                    conditionDiv.classList.add('alert');
+                                }
+                            }
+
+                            // Append gaze info and condition to the list
+                            gazeDiv.appendChild(conditionDiv);
                             gazeList.appendChild(gazeDiv);
                         });
                     } else {
@@ -71,7 +100,7 @@
         }
 
         // Call fetchGazeData function every 1 second to update gaze data
-        setInterval(fetchGazeData, 1000);
+        setInterval(fetchGazeData, 500);
 
         // Initial fetch when the page loads
         fetchGazeData();
