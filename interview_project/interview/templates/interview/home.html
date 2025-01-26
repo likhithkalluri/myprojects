@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Interface</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        .container { display: flex; height: 100vh; }
+        .header { display: flex; margin-left: 20px; margin-right: 20px; border-bottom: 1px solid rgb(196, 191, 191); align-items: center; padding: 10px 40px; }
+        .header img { width: 130px; height: 35px; margin-right: 250px; }
+        .header h1 { white-space: nowrap; }
+        
+        .main { display: flex; flex-direction: column; flex-grow: 1; }
+        .video-section { position: relative; }
+        /*.video-section { flex-grow: 2; background-color: gainsboro; margin: 30px; margin-right: 25px; border-radius: 20px;margin-bottom: 10px; padding: 20px; display: flex; align-items: center; justify-content: center; }*/
+        .video-feed{  width:60vw; height: 70vh; border-radius: 30px; object-fit: cover; flex-grow: 2; margin: 30px;margin-left: 80px;  padding: 20px; margin-bottom: 0px; margin-top: 0%; display: flex; align-items: center; justify-content: center;  }
+        .img1 {  z-index: 1;  width: 200px; height: 130px; position: absolute; border-radius: 10px; object-fit: cover;  right: 70px;  top: 40px;}
+        /* .header { display: flex; width: 100%; border-bottom: 1px solid rgb(196, 191, 191); align-items: center; padding: 10px 20px; } */
+      
+      
+        .footer { display: flex; justify-content: space-between; align-items: center; margin: 20px 30px; gap: 10px; }
+        .button-container { display: flex; flex-direction: column; align-items: center; }
+
+        .center-buttons { display: flex; gap: 20px; justify-content: center; }
+        .footer button { border: 1px solid rgb(175, 166, 166); width: 50px; height: 50px; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .footer button.start { width: 140px; background-color: #ff6600; color: white; }
+        .footer button.default span { font-size: 12px; margin-top: 5px; }
+        .button-name { font-size: 12px; margin-top: 5px; color: #333; text-align: center; }
+        
+        .chat-section { flex-grow: 1; background-color: gainsboro; margin: 30px;width: 70%; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; margin-left: 1px;margin-top: 10px;margin-right: 15px;}
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 370px;border-radius: 10px   ;background-color: #f4f4f4; }
+        .tabs button { flex: 1; padding: 10px; margin: 5px; border: none; background-color: #f4f4f4; cursor: pointer;border-radius: 10px }
+        .tabs button.active { background-color: #ff6600; color: white; }
+        
+        textarea { width: 90%; height: 70px; margin-top: 130px; padding: 10px; border-radius: 10px; border: 1px solid #ddd; resize: none; }
+        .text { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .border-bottom{ border-bottom: 1px solid  rgb(196, 191, 191); margin-left: 20px;margin-right: 20px;}
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="main">
+        <!-- Header -->
+        <div class="header">
+            <img src="{{ logo_url }}" alt="Logo">
+            <h1>{{ header_text }}</h1>
+        </div>
+
+        <!-- Video Section -->
+        <div>
+        <div class="video-section">
+            <img class="img1" src="{{ video_thumbnail }}" alt="Video Thumbnail">
+            <img class="video-feed" src="{% url 'stream_video' %}" alt="Live Video Feed" />
+            
+        </div>
+        
+            
+        </div>
+        <div class="border-bottom"></div>
+        <!-- Footer Buttons -->
+        <div class="footer">
+            <!-- Leftmost Button -->
+            <div class="button-container">
+                <button class="default">
+                    <i class="fa fa-gear" style="font-size: 24px;"></i>
+                </button>
+                <span class="button-name">Settings</span>
+            </div>
+            <!-- Centered Buttons -->
+            <div class="center-buttons">
+                <div class="button-container">
+                    <button class="default">
+                        <i class="fas fa-microphone-slash" style="font-size: 24px;"></i>
+                    </button>
+                    <span class="button-name">Mute</span>
+                </div>
+                <div class="button-container">
+                    <button class="start">
+                        <span>Start Interview</span>
+                    </button>
+                    <span class="button-name"></span>
+                </div>
+                <div class="button-container">
+                    <button class="default">
+                        <i class="fas fa-video" style="font-size: 24px;"></i>
+                    </button>
+                    <span class="button-name">Camera</span>
+                </div>
+            </div>
+            <!-- Rightmost Button -->
+            <div class="button-container">
+                <button class="default">
+                    <i class="fas fa-code" style="font-size: 24px;"></i>
+                </button>
+                <span class="button-name">Code Editor</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="chat-section">
+        <div class="tabs">
+            {% for tab in tabs %}
+                <button class="{% if tab.is_active %}active{% endif %}">{{ tab.text }}</button>
+            {% endfor %}
+        </div>
+        <textarea placeholder="Type your answer here..."></textarea>
+    </div>
+</div>
+</body>
+</html>
