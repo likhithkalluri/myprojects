@@ -43,18 +43,18 @@
         button {
             padding: 10px 20px;
             font-size: 16px;
-            margin: 5px;
             cursor: pointer;
             border: none;
             border-radius: 5px;
-        }
-        button.start {
             background-color: #4caf50;
             color: white;
+            margin: 5px;
         }
         button.stop {
             background-color: #f44336;
-            color: white;
+        }
+        button.result {
+            background-color: #2196f3;
         }
     </style>
 </head>
@@ -63,8 +63,8 @@
     
     <!-- Controls -->
     <div id="controls">
-        <button class="start" onclick="startCamera()">Start Camera</button>
-        <button class="stop" onclick="stopCamera()">Stop Camera</button>
+        <button id="toggle-button" onclick="toggleCamera()">Start Camera</button>
+        <button id="result-button" class="result" onclick="redirectToResult()">Result</button>
     </div>
     
     <!-- Video Feed Section -->
@@ -79,13 +79,67 @@
     </div>
 
     <script>
+        let isCameraOn = false; // Track the current state of the camera
+        let fetchGazeInterval; // Variable to hold the interval for fetching gaze data
+
+        // Function to toggle the camera state
+        function toggleCamera() {
+            const toggleButton = document.getElementById('toggle-button');
+            const videoFeed = document.getElementById('video-feed');
+
+            if (!isCameraOn) {
+                // Start the camera
+                fetch('/start_camera/')
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Camera started successfully.");
+                            alert("Camera started successfully.");
+                            videoFeed.style.display = 'block';
+                            videoFeed.src = "/stream_video";
+                            // Start fetching gaze data
+                            fetchGazeInterval = setInterval(fetchGazeData, 500);
+                            fetchGazeData(); // Initial fetch
+                            toggleButton.textContent = "Stop Camera";
+                            toggleButton.classList.add("stop");
+                            isCameraOn = true;
+                        } else {
+                            alert("Failed to start the camera.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error starting the camera:", error);
+                    });
+            } else {
+                // Stop the camera
+                fetch('/stop_camera/')
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Camera stopped successfully.");
+                            alert("Camera stopped successfully.");
+                            videoFeed.style.display = 'none';
+                            videoFeed.src = '';
+                            // Stop fetching gaze data
+                            clearInterval(fetchGazeInterval);
+                            toggleButton.textContent = "Start Camera";
+                            toggleButton.classList.remove("stop");
+                            isCameraOn = false;
+                        } else {
+                            alert("Failed to stop the camera.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error stopping the camera:", error);
+                    });
+            }
+        }
+
         // Function to fetch gaze data from the backend
         function fetchGazeData() {
             fetch('/detect_gaze/')
                 .then(response => response.json())
                 .then(data => {
                     const gazeList = document.getElementById('gaze-list');
-                    gazeList.innerHTML = ''; // Clear the previous data
+                    gazeList.innerHTML = ''; // Clear previous data
 
                     if (data.gazes && data.gazes.length > 0) {
                         data.gazes.forEach(gaze => {
@@ -124,49 +178,46 @@
                 });
         }
 
-        // Function to start the camera
-        function startCamera() {
-            fetch('/start_camera/')
-                .then(response => {
-                    if (response.ok) {
-                        console.log("Camera started successfully.");
-                        alert("Camera started successfully.");
-                        document.getElementById('video-feed').style.display = 'block';
-                        document.getElementById('video-feed').src = "/stream_video";
-                        // Start fetching gaze data at regular intervals
-                        fetchGazeInterval = setInterval(fetchGazeData, 500);
-                        fetchGazeData(); // Initial fetch
-                    } else {
-                        alert("Failed to start the camera.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error starting the camera:", error);
-                });
+        // Function to redirect to the result page with a confirmation popup
+        function redirectToResult() {
+            const confirmRedirect = confirm("Are you sure you want to go to the result page?");
+            if (confirmRedirect) {
+                // Stop the camera and gaze data fetching
+                if (isCameraOn) {
+                    fetch('/stop_camera/')
+                        .then(response => {
+                            if (response.ok) {
+                                console.log("Camera stopped before redirecting.");
+                                clearInterval(fetchGazeInterval); // Stop gaze data fetching
+                                isCameraOn = false;
+                                
+                                // Stop the video feed by hiding it and clearing the source
+                                const videoFeed = document.getElementById('video-feed');
+                                videoFeed.style.display = 'none';
+                                videoFeed.src = '';
+                                
+                                // Open the result page in a new tab
+                                window.open("/result_page/", "_blank");
+                            } else {
+                                alert("Failed to stop the camera before redirecting.");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error stopping the camera before redirecting:", error);
+                        });
+                } else {
+                    // Stop the video feed by hiding it and clearing the source if the camera is already off
+                    const videoFeed = document.getElementById('video-feed');
+                    videoFeed.style.display = 'none';
+                    videoFeed.src = '';
+                    
+                    // Open the result page in a new tab immediately if the camera is already off
+                    window.open("/result_page/", "_blank");
+                }
+            } else {
+                console.log("User canceled the redirection.");
+            }
         }
-
-        // Function to stop the camera
-        function stopCamera() {
-            fetch('/stop_camera/')
-                .then(response => {
-                    if (response.ok) {
-                        console.log("Camera stopped successfully.");
-                        alert("Camera stopped successfully.");
-                        document.getElementById('video-feed').style.display = 'none';
-                        document.getElementById('video-feed').src = '';
-                        // Stop fetching gaze data
-                        clearInterval(fetchGazeInterval);
-                    } else {
-                        alert("Failed to stop the camera.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error stopping the camera:", error);
-                });
-        }
-
-        // Variable to hold the interval ID for fetching gaze data
-        let fetchGazeInterval;
     </script>
 </body>
 </html>

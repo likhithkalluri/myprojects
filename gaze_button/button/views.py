@@ -144,3 +144,6 @@ def stream_video(request):
 # Index page
 def index(request):
     return render(request, 'button/index.html')
+
+def result_page(request):
+    return render(request, 'button/result.html')  # Render a result page template
