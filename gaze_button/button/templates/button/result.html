@@ -3,23 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Result Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            color: #333;
-        }
-    </style>
+    <title>Gaze Results</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
-<body>
-    <h1>Results</h1>
-    <p>This is the result page.</p>
+<body class="bg-gray-100">
+    <div class="container mx-auto py-10">
+        <h1 class="text-3xl font-bold text-center mb-8">Gaze Results</h1>
+
+        <table class="table-auto w-full bg-white rounded shadow-md overflow-hidden">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2">Person</th>
+                    <th class="px-4 py-2">Gaze Direction</th>
+                    <th class="px-4 py-2">Angle</th>
+                    <th class="px-4 py-2">Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gaze in gazes %}
+                <tr class="border-t">
+                    <td class="px-4 py-2 text-center">{{ gaze.person }}</td>
+                    <td class="px-4 py-2 text-center">{{ gaze.gaze_direction }}</td>
+                    <td class="px-4 py-2 text-center">{{ gaze.angle }}°</td>
+                    <td class="px-4 py-2 text-center">{{ gaze.message }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

@@ -56,6 +56,27 @@
         button.result {
             background-color: #2196f3;
         }
+
+        /* Styling for displaying captured images */
+        #screenshot-container {
+            margin-top: 20px;
+            width: 80%;
+            text-align: center;
+        }
+        .screenshot-wrapper {
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .screenshot-wrapper img {
+            max-width: 100%;
+            height: auto;
+        }
+        .screenshot-wrapper .timestamp {
+            font-size: 14px;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +87,7 @@
         <button id="toggle-button" onclick="toggleCamera()">Start Camera</button>
         <button id="result-button" class="result" onclick="redirectToResult()">Result</button>
     </div>
+
     
     <!-- Video Feed Section -->
     <div id="video-container">
@@ -78,15 +100,20 @@
         <div id="gaze-list"></div>
     </div>
 
+    <!-- Captured Screenshot Section -->
+    <div id="screenshot-container"></div>
+
     <script>
         let isCameraOn = false; // Track the current state of the camera
         let fetchGazeInterval; // Variable to hold the interval for fetching gaze data
+        const videoFeed = document.getElementById('video-feed');
+        const screenshotContainer = document.getElementById('screenshot-container');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
         // Function to toggle the camera state
         function toggleCamera() {
             const toggleButton = document.getElementById('toggle-button');
-            const videoFeed = document.getElementById('video-feed');
-
             if (!isCameraOn) {
                 // Start the camera
                 fetch('/start_camera/')
@@ -162,6 +189,7 @@
                                 } else {
                                     conditionDiv.textContent = "Alert! You are seeing out of the screen.";
                                     conditionDiv.classList.add('alert');
+                                    captureScreenshot();  // Capture screenshot when angle > 13
                                 }
                             }
 
@@ -178,6 +206,32 @@
                 });
         }
 
+        // Function to capture the screenshot
+        function captureScreenshot() {
+            canvas.width = videoFeed.videoWidth || videoFeed.width;
+            canvas.height = videoFeed.videoHeight || videoFeed.height;
+            ctx.drawImage(videoFeed, 0, 0);
+            const screenshotData = canvas.toDataURL('image/png');
+
+            // Create a new image element and display it with the timestamp
+            const imgElement = document.createElement('img');
+            imgElement.src = screenshotData;
+            imgElement.alt = 'Captured Screenshot';
+            imgElement.style.maxWidth = '100%';
+
+            const timestampDiv = document.createElement('div');
+            const currentTime = new Date().toLocaleString();
+            timestampDiv.textContent = `Captured at: ${currentTime}`;
+            timestampDiv.classList.add('timestamp');
+
+            // Add the image and timestamp to the screenshot container
+            const screenshotWrapper = document.createElement('div');
+            screenshotWrapper.classList.add('screenshot-wrapper');
+            screenshotWrapper.appendChild(imgElement);
+            screenshotWrapper.appendChild(timestampDiv);
+            screenshotContainer.appendChild(screenshotWrapper);
+        }
+
         // Function to redirect to the result page with a confirmation popup
         function redirectToResult() {
             const confirmRedirect = confirm("Are you sure you want to go to the result page?");
@@ -192,7 +246,6 @@
                                 isCameraOn = false;
                                 
                                 // Stop the video feed by hiding it and clearing the source
-                                const videoFeed = document.getElementById('video-feed');
                                 videoFeed.style.display = 'none';
                                 videoFeed.src = '';
                                 
@@ -207,9 +260,6 @@
                         });
                 } else {
                     // Stop the video feed by hiding it and clearing the source if the camera is already off
-                    const videoFeed = document.getElementById('video-feed');
-                    videoFeed.style.display = 'none';
-                    videoFeed.src = '';
                     
                     // Open the result page in a new tab immediately if the camera is already off
                     window.open("/result_page/", "_blank");

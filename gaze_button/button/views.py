@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import dlib
 import math
+from .models import Gaze
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
@@ -55,6 +56,8 @@ def calculate_horizontal_gaze_and_angle(pupil_position, eye_region):
     return direction, round(angle, 2)
 
 # Gaze detection for multiple persons
+from .models import Gaze
+
 def detect_gaze(request):
     global cap
     ret, frame = cap.read()
@@ -95,15 +98,30 @@ def detect_gaze(request):
                 "right" if left_direction == "right" or right_direction == "right" else "center")
 
             angle = max(left_angle, right_angle)
-
-            gazes.append({
-                'person': f"Person{person_counter}",
-                'gaze_direction': f"{gaze_direction} ({angle}°)",
-            })
+            
+            # Set message and save only if the angle is greater than 13
+            message = None
+            if angle > 13:
+                message = "Out of the screen"
+                # Store gaze in the database
+                gaze = Gaze.objects.create(
+                    person=f"Person{person_counter}",
+                    gaze_direction=f"{gaze_direction} ({angle}°)",
+                    angle=angle,
+                    message=message
+                )
+                gazes.append({
+                    'person': f"Person{person_counter}",
+                    'gaze_direction': f"{gaze_direction} ({angle}°)",
+                    'angle': angle,
+                    'message': message,
+                })
 
         person_counter += 1
 
     return JsonResponse({'gazes': gazes})
+
+
 
 # Webcam video feed generator
 def video_feed():
@@ -145,5 +163,14 @@ def stream_video(request):
 def index(request):
     return render(request, 'button/index.html')
 
+
 def result_page(request):
-    return render(request, 'button/result.html')  # Render a result page template
+    gazes = Gaze.objects.all()
+    
+    # Render the result page with the gazes
+    response = render(request, 'button/result.html', {'gazes': gazes})
+    
+    # Delete the data from the database after rendering the page
+    Gaze.objects.all().delete()
+    
+    return response

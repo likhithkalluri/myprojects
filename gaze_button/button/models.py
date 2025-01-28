@@ -1,12 +1,9 @@
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now
 
-class GazeRecord(models.Model):
-    timestamp = models.DateTimeField(default=timezone.now)
-    direction = models.CharField(max_length=10)
+class Gaze(models.Model):
+    person = models.CharField(max_length=100)
+    gaze_direction = models.CharField(max_length=100)
     angle = models.FloatField()
-    message = models.TextField()
-    screenshot = models.ImageField(upload_to='screenshots/', null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.direction} ({self.angle}°) - {self.timestamp}"
+    message = models.CharField(max_length=255, null=True, blank=True)
+    timestamp = models.DateTimeField(default=now)
