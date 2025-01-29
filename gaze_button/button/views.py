@@ -5,6 +5,7 @@ import numpy as np
 import dlib
 import math
 from .models import Gaze
+from django.utils import timezone
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
@@ -101,18 +102,22 @@ def detect_gaze(request):
             
             # Set message and save only if the angle is greater than 13
             message = None
+            
             if angle > 13:
                 message = "Out of the screen"
+                timestamp=timezone.now()
                 # Store gaze in the database
                 gaze = Gaze.objects.create(
                     person=f"Person{person_counter}",
                     gaze_direction=f"{gaze_direction}",
-                    message=message
+                    message=message,
+                    timestamp=timestamp
                 )
                 gazes.append({
                     'person': f"Person{person_counter}",
                     'gaze_direction': f"{gaze_direction}",
                     'message': message,
+                    'timestamp': timestamp.strftime('%Y-%m-%d %H:%M:%S') 
                 })
 
         person_counter += 1
