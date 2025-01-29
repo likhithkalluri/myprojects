@@ -177,29 +177,12 @@
                             const angleMatch = gaze.gaze_direction.match(/\((\d+\.\d*)\u00b0\)/);
                             const angle = angleMatch ? parseFloat(angleMatch[1]) : null;
 
-                            // Add gaze information
-                            gazeDiv.innerHTML = `<span>${gaze.person}:</span> ${gaze.gaze_direction}`;
-
-                            // Add condition based on the angle
-                            const conditionDiv = document.createElement('div');
-                            if (angle !== null) {
-                                if (angle <= 13) {
-                                    conditionDiv.textContent = "You are seeing the screen.";
-                                    conditionDiv.classList.add('screen');
-                                } else {
-                                    conditionDiv.textContent = "Alert! You are seeing out of the screen.";
-                                    conditionDiv.classList.add('alert');
-                                    captureScreenshot();  // Capture screenshot when angle > 13
-                                }
-                            }
 
                             // Append gaze info and condition to the list
                             gazeDiv.appendChild(conditionDiv);
                             gazeList.appendChild(gazeDiv);
                         });
-                    } else {
-                        gazeList.innerHTML = '<p>No faces detected.</p>';
-                    }
+                    } 
                 })
                 .catch(error => {
                     console.error('Error fetching gaze data:', error);
@@ -207,30 +190,7 @@
         }
 
         // Function to capture the screenshot
-        function captureScreenshot() {
-            canvas.width = videoFeed.videoWidth || videoFeed.width;
-            canvas.height = videoFeed.videoHeight || videoFeed.height;
-            ctx.drawImage(videoFeed, 0, 0);
-            const screenshotData = canvas.toDataURL('image/png');
 
-            // Create a new image element and display it with the timestamp
-            const imgElement = document.createElement('img');
-            imgElement.src = screenshotData;
-            imgElement.alt = 'Captured Screenshot';
-            imgElement.style.maxWidth = '100%';
-
-            const timestampDiv = document.createElement('div');
-            const currentTime = new Date().toLocaleString();
-            timestampDiv.textContent = `Captured at: ${currentTime}`;
-            timestampDiv.classList.add('timestamp');
-
-            // Add the image and timestamp to the screenshot container
-            const screenshotWrapper = document.createElement('div');
-            screenshotWrapper.classList.add('screenshot-wrapper');
-            screenshotWrapper.appendChild(imgElement);
-            screenshotWrapper.appendChild(timestampDiv);
-            screenshotContainer.appendChild(screenshotWrapper);
-        }
 
         // Function to redirect to the result page with a confirmation popup
         function redirectToResult() {
@@ -259,9 +219,7 @@
                             console.error("Error stopping the camera before redirecting:", error);
                         });
                 } else {
-                    // Stop the video feed by hiding it and clearing the source if the camera is already off
-                    
-                    // Open the result page in a new tab immediately if the camera is already off
+
                     window.open("/result_page/", "_blank");
                 }
             } else {

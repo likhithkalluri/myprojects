@@ -106,14 +106,12 @@ def detect_gaze(request):
                 # Store gaze in the database
                 gaze = Gaze.objects.create(
                     person=f"Person{person_counter}",
-                    gaze_direction=f"{gaze_direction} ({angle}°)",
-                    angle=angle,
+                    gaze_direction=f"{gaze_direction}",
                     message=message
                 )
                 gazes.append({
                     'person': f"Person{person_counter}",
-                    'gaze_direction': f"{gaze_direction} ({angle}°)",
-                    'angle': angle,
+                    'gaze_direction': f"{gaze_direction}",
                     'message': message,
                 })
 
