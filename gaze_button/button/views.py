@@ -6,6 +6,8 @@ import dlib
 import math
 from .models import Gaze
 from django.utils import timezone
+from io import BytesIO
+import base64
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
@@ -45,10 +47,10 @@ def calculate_horizontal_gaze_and_angle(pupil_position, eye_region):
     eye_width = np.max(eye_region[:, 0]) - np.min(eye_region[:, 0])
 
     if pupil_position[0] < eye_center_x:
-        direction = "right"
+        direction = "left"
         angle = math.degrees(math.atan((eye_center_x - pupil_position[0]) / eye_width))
     elif pupil_position[0] > eye_center_x:
-        direction = "left"
+        direction = "right"
         angle = math.degrees(math.atan((pupil_position[0] - eye_center_x) / eye_width))
     else:
         direction = "center"
@@ -106,18 +108,24 @@ def detect_gaze(request):
             if angle > 13:
                 message = "Out of the screen"
                 timestamp=timezone.now()
+
+                  # 📸 Convert Screenshot to Binary
+                _, buffer = cv2.imencode('.jpg', frame)
+                image_binary = buffer.tobytes()  # Convert image to binary
                 # Store gaze in the database
                 gaze = Gaze.objects.create(
                     person=f"Person{person_counter}",
                     gaze_direction=f"{gaze_direction}",
                     message=message,
-                    timestamp=timestamp
+                    timestamp=timestamp,
+                    image=image_binary
                 )
                 gazes.append({
                     'person': f"Person{person_counter}",
                     'gaze_direction': f"{gaze_direction}",
                     'message': message,
-                    'timestamp': timestamp.strftime('%Y-%m-%d %H:%M:%S') 
+                    'timestamp': timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                    'image': base64.b64encode(gaze.image).decode('utf-8') if gaze.image else None
                 })
 
         person_counter += 1

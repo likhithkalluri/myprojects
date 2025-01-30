@@ -17,6 +17,7 @@
                     <th class="px-4 py-2">Gaze Direction</th>
                     <th class="px-4 py-2">Message</th>
                     <th class="px-4 py-2">Time stamp</th>
+                    <th class="px-4 py-2">Screenshot</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,6 +27,11 @@
                     <td class="px-4 py-2 text-center">{{ gaze.gaze_direction }}</td>
                     <td class="px-4 py-2 text-center">{{ gaze.message }}</td>
                     <td class="px-4 py-2 text-center">{{ gaze.timestamp }}</td>
+                    <td class="px-4 py-2 text-center">
+                        {% if gaze.get_image_base64 %}
+                        <img src="data:image/jpeg;base64,{{ gaze.get_image_base64 }}" alt="Screenshot" width="100">
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
