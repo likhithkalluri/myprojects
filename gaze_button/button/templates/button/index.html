@@ -29,14 +29,7 @@
         .person-gaze span {
             font-weight: bold;
         }
-        .screen {
-            color: green;
-            font-weight: bold;
-        }
-        .alert {
-            color: red;
-            font-weight: bold;
-        }
+
         #controls {
             margin: 20px 0;
         }
@@ -46,45 +39,27 @@
             cursor: pointer;
             border: none;
             border-radius: 5px;
-            background-color: #4caf50;
-            color: white;
+            background-color: #eeeeee;
+            color: rgb(22, 22, 22);
             margin: 5px;
         }
         button.stop {
-            background-color: #f44336;
+            background-color: #f1f0f0;
+            color: black;
+            
         }
         button.result {
-            background-color: #2196f3;
-        }
-
-        /* Styling for displaying captured images */
-        #screenshot-container {
-            margin-top: 20px;
-            width: 80%;
-            text-align: center;
-        }
-        .screenshot-wrapper {
-            margin-bottom: 20px;
-            border: 2px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        .screenshot-wrapper img {
-            max-width: 100%;
-            height: auto;
-        }
-        .screenshot-wrapper .timestamp {
-            font-size: 14px;
-            color: #555;
+            background-color: #131414;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <h1>Gaze Detection</h1>
+
     
     <!-- Controls -->
     <div id="controls">
-        <button id="toggle-button" onclick="toggleCamera()">Start Camera</button>
+        <button id="toggle-button" onclick="toggleCamera()"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="m9.56 8-2-2-4.15-4.14L2 3.27 4.73 6H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.21 0 .39-.08.55-.18L19.73 21l1.41-1.41-8.86-8.86L9.56 8zM5 16V8h1.73l8 8H5zm10-8v2.61l6 6V6.5l-4 4V7c0-.55-.45-1-1-1h-5.61l2 2H15z"></path></svg> </button>
         <button id="result-button" class="result" onclick="redirectToResult()">Result</button>
     </div>
 
@@ -113,17 +88,15 @@
                     .then(response => {
                         if (response.ok) {
                             console.log("Camera started successfully.");
-                            alert("Camera started successfully.");
                             videoFeed.style.display = 'block';
                             videoFeed.src = "/stream_video";
-                            // Start fetching gaze data
                             fetchGazeInterval = setInterval(fetchGazeData, 500);
                             fetchGazeData(); // Initial fetch
-                            toggleButton.textContent = "Stop Camera";
+                            toggleButton.innerHTML = `<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"></path></svg>`;
                             toggleButton.classList.add("stop");
                             isCameraOn = true;
                         } else {
-                            alert("Failed to start the camera.");
+                            console.error("Failed to start the camera.");
                         }
                     })
                     .catch(error => {
@@ -135,16 +108,14 @@
                     .then(response => {
                         if (response.ok) {
                             console.log("Camera stopped successfully.");
-                            alert("Camera stopped successfully.");
                             videoFeed.style.display = 'none';
                             videoFeed.src = '';
-                            // Stop fetching gaze data
                             clearInterval(fetchGazeInterval);
-                            toggleButton.textContent = "Start Camera";
+                            toggleButton.innerHTML = `<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="m9.56 8-2-2-4.15-4.14L2 3.27 4.73 6H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.21 0 .39-.08.55-.18L19.73 21l1.41-1.41-8.86-8.86L9.56 8zM5 16V8h1.73l8 8H5zm10-8v2.61l6 6V6.5l-4 4V7c0-.55-.45-1-1-1h-5.61l2 2H15z"></path></svg>`;
                             toggleButton.classList.remove("stop");
                             isCameraOn = false;
                         } else {
-                            alert("Failed to stop the camera.");
+                            console.error("Failed to stop the camera.");
                         }
                     })
                     .catch(error => {
@@ -152,6 +123,7 @@
                     });
             }
         }
+        
 
         // Function to fetch gaze data from the backend
         function fetchGazeData() {
@@ -181,9 +153,6 @@
                     console.error('Error fetching gaze data:', error);
                 });
         }
-
-        // Function to capture the screenshot
-
 
         // Function to redirect to the result page with a confirmation popup
         function redirectToResult() {
